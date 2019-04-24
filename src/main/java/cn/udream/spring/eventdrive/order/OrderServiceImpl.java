@@ -17,12 +17,14 @@ public class OrderServiceImpl implements OrderService {
 	private ApplicationContext applicationContext;
 
 	@Override
-	public void saveOrder() {
-		System.out.println("订单创建成功");
+	public void saveOrder(Order order) {
+		System.out.println("准备创建订单");
 
 		// 创建订单事件
-		OrderCreateEvent orderCreateEvent = new OrderCreateEvent("order create is success");
+		OrderCreateEvent orderCreateEvent = new OrderCreateEvent(order);
 		// 利用applicationContext将事件发布
 		applicationContext.publishEvent(orderCreateEvent);
+
+		System.out.println("订单创建成功");
 	}
 }

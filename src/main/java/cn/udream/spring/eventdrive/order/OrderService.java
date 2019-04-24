@@ -7,5 +7,5 @@ package cn.udream.spring.eventdrive.order;
  **/
 public interface OrderService {
 
-	void saveOrder();
+	void saveOrder(Order order);
 }

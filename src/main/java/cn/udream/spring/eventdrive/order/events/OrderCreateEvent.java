@@ -1,5 +1,6 @@
 package cn.udream.spring.eventdrive.order.events;
 
+import cn.udream.spring.eventdrive.order.Order;
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -9,7 +10,7 @@ import org.springframework.context.ApplicationEvent;
  **/
 public class OrderCreateEvent extends ApplicationEvent {
 
-	public OrderCreateEvent(Object source) {
-		super(source);
+	public OrderCreateEvent(Order order) {
+		super(order);
 	}
 }
