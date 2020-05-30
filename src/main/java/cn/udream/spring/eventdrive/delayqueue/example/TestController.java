@@ -13,10 +13,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @description: 测试
@@ -41,7 +38,16 @@ public class TestController {
         job.setTopic("test-pay-notify");
         job.setDelay(delay);
         job.setTtr(60);
-        job.setBody(new PayFlow(1234560L, 1234567L, new BigDecimal("123.98"), 1, LocalDateTime.now()));
+
+        PayFlow payFlow = new PayFlow(1234560L, 1234567L, new BigDecimal("123.98"), 1, LocalDateTime.now());
+        PayFlow.Abcd abcd = new PayFlow.Abcd("s", 100000L, 124);
+        payFlow.setAbcd(abcd);
+        List<PayFlow.Abcd> abcds = new ArrayList<>();
+        abcds.add(abcd);
+        abcds.add(abcd);
+        payFlow.setAbcds(abcds);
+
+        job.setBody(payFlow);
         job.setIntervals(new int[]{0, 0, 12, 30});
         List<Object> objects = delayBucket.push(job);
         log.info("push success, objects: {}", objects);

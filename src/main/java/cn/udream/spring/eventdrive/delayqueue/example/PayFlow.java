@@ -5,6 +5,7 @@ import lombok.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -28,4 +29,29 @@ public class PayFlow implements Serializable {
 
     /** 更新时间 */
     private LocalDateTime updateTime;
+
+    public PayFlow(Long orderId, Long outTradeNo, BigDecimal actualAmount, Integer payStatus, LocalDateTime updateTime) {
+        this.orderId = orderId;
+        this.outTradeNo = outTradeNo;
+        this.actualAmount = actualAmount;
+        this.payStatus = payStatus;
+        this.updateTime = updateTime;
+    }
+
+    private Abcd abcd;
+
+    private List<Abcd> abcds;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode(callSuper = false)
+    @ToString
+    public static class Abcd {
+        private String s;
+
+        private Long h;
+
+        private Integer p;
+    }
 }
