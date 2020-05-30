@@ -2,17 +2,20 @@ package cn.udream.spring.eventdrive.delayqueue.config;
 
 import cn.udream.spring.eventdrive.delayqueue.core.DelayBucket;
 import cn.udream.spring.eventdrive.delayqueue.core.JobPostProcessor;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,31 +36,48 @@ public class BeansConfig {
 
     private final AtomicInteger executeThreadCounter = new AtomicInteger(1);
 
-    /**
-     * redisTemplate 默认序列化使用的jdkSerializeable, 存储为二进制字节码, 所以自定义序列化类
-     */
     @Bean
     @ConditionalOnMissingBean(name = {"redisTemplate"})
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(factory);
 
-        // 使用Jackson2JsonRedisSerialize 替换默认序列化
-        Jackson2JsonRedisSerializer<?> serializer = new Jackson2JsonRedisSerializer(Object.class);
+        //key采用String序列化方式
+        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        redisTemplate.setKeySerializer(stringRedisSerializer);
+        redisTemplate.setHashKeySerializer(stringRedisSerializer);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-
-        serializer.setObjectMapper(objectMapper);
-
-        // 设置value的序列化规则和 key的序列化规则
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        //value采用fast-json序列化方式。
+        FastJson2JsonRedisSerializer<Object> serializer = new FastJson2JsonRedisSerializer<>(Object.class);
         redisTemplate.setValueSerializer(serializer);
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashValueSerializer(serializer);
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
+    }
+
+    public static class FastJson2JsonRedisSerializer<T> implements RedisSerializer<T> {
+        public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+        private Class<T> clazz;
+
+        public FastJson2JsonRedisSerializer(Class<T> clazz) {
+            super();
+            this.clazz = clazz;
+        }
+
+        public byte[] serialize(T t) throws SerializationException {
+            if (t == null) {
+                return new byte[0];
+            }
+            return JSON.toJSONString(t, SerializerFeature.WriteClassName).getBytes(DEFAULT_CHARSET);
+        }
+
+        public T deserialize(byte[] bytes) throws SerializationException {
+            if (bytes == null || bytes.length <= 0) {
+                return null;
+            }
+            String str = new String(bytes, DEFAULT_CHARSET);
+            return JSON.parseObject(str, clazz, Feature.SupportAutoType);
+        }
     }
 
     @Bean
@@ -86,7 +106,7 @@ public class BeansConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public DelayBucket delayBucket(RedisTemplate<String, String> redisTemplate) {
+    public DelayBucket delayBucket(RedisTemplate<String, Object> redisTemplate) {
         return new DelayBucket(redisTemplate);
     }
 

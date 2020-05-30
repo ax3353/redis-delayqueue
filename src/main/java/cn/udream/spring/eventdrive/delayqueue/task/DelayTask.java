@@ -5,18 +5,16 @@ import cn.udream.spring.eventdrive.delayqueue.consts.ExecuteState;
 import cn.udream.spring.eventdrive.delayqueue.consts.KEYS;
 import cn.udream.spring.eventdrive.delayqueue.core.Callback;
 import cn.udream.spring.eventdrive.delayqueue.core.MetaJob;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -28,13 +26,13 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 public class DelayTask implements Runnable {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     private final ExecutorService executeThreadPool;
 
     private final GlobalConfig globalConfig;
 
-    public DelayTask(RedisTemplate<String, String> redisTemplate, ExecutorService executeThreadPool, GlobalConfig globalConfig) {
+    public DelayTask(RedisTemplate<String, Object> redisTemplate, ExecutorService executeThreadPool, GlobalConfig globalConfig) {
         this.redisTemplate = redisTemplate;
         this.executeThreadPool = executeThreadPool;
         this.globalConfig = globalConfig;
@@ -44,7 +42,7 @@ public class DelayTask implements Runnable {
     public void run() {
         long now = Instant.now().getEpochSecond();
         long begin = now - 24 * 3600;
-        Set<String> objects = redisTemplate.boundZSetOps(KEYS.DELAY_KEY).rangeByScore(begin, now);
+        Set<Object> objects = redisTemplate.boundZSetOps(KEYS.DELAY_KEY).rangeByScore(begin, now);
         if (CollectionUtils.isEmpty(objects)) {
             return;
         }
@@ -52,8 +50,8 @@ public class DelayTask implements Runnable {
         log.debug("waiting notify queue has objects: {}", objects);
 
         objects.stream()
-                .filter(globalConfig::isWaitProcessing)
-                .map(k -> (Runnable) () -> executeCallback(k))
+                .filter(k -> globalConfig.isWaitProcessing(k.toString()))
+                .map(k -> (Runnable) () -> executeCallback(k.toString()))
                 .forEach(executeThreadPool::submit);
     }
 
@@ -75,15 +73,11 @@ public class DelayTask implements Runnable {
         Callback<T> callback = (Callback<T>) callbackMap.get(topic);
         Class<T> clz = this.getActualType(callback);
 
-        T body = null;
+        T body;
         if (ClassUtils.isPrimitiveOrWrapper(clz)) {
             body = (T) this.convert(clz, metaJob.getBody());
         } else {
-            try {
-                body = new ObjectMapper().readValue(metaJob.getBody(), clz);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            body = JSON.parseObject(metaJob.getBody(), clz);
         }
 
         ExecuteState executeState = callback.execute(body);
@@ -98,16 +92,7 @@ public class DelayTask implements Runnable {
 
     private MetaJob toMetaJob(String key) {
         Object o = redisTemplate.opsForHash().get(KEYS.HASH_KEY, key);
-        if (o == null) {
-            return null;
-        }
-
-        try {
-            return new ObjectMapper().readValue(o.toString(), MetaJob.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return o instanceof MetaJob ? (MetaJob) o : null;
     }
 
     /**
@@ -118,6 +103,7 @@ public class DelayTask implements Runnable {
 
         if (metaJob.getHasRetry() > metaJob.getIntervals().length) {
             this.deleteJob(key);
+            log.warn("Job: {} 重试次数已用完", metaJob.getId());
             return;
         }
         this.rePush(metaJob);
@@ -136,8 +122,7 @@ public class DelayTask implements Runnable {
 
         redisTemplate.opsForZSet().add(KEYS.DELAY_KEY, jobId, executeTime);
         try {
-            String body = new ObjectMapper().writeValueAsString(metaJob);
-            redisTemplate.opsForHash().put(KEYS.HASH_KEY, jobId, body);
+            redisTemplate.opsForHash().put(KEYS.HASH_KEY, jobId, metaJob);
         } catch (Exception e) {
             log.error("Json Processing Exception", e);
             redisTemplate.opsForZSet().remove(KEYS.DELAY_KEY, jobId);
@@ -160,17 +145,13 @@ public class DelayTask implements Runnable {
     }
 
     private Class getActualType(Callback callback) {
-        try {
-            Type superClass = callback.getClass().getGenericSuperclass();
-            if (superClass instanceof ParameterizedType) {
-                ParameterizedType p = (ParameterizedType) superClass;
-                Type rawType = p.getRawType(); // 父类实际类型
-                Type[] actualTypes = p.getActualTypeArguments(); //父类泛型实际类型
-                System.out.println("父类类型： " + rawType.toString() + " 父类泛型实际类型：" + Arrays.toString(actualTypes));
+        Type[] superClass = callback.getClass().getGenericInterfaces();
+        for (Type type : superClass) {
+            if (ParameterizedType.class.isAssignableFrom(type.getClass())) {
+                ParameterizedType p = (ParameterizedType) type;
+                Type[] actualTypes = p.getActualTypeArguments();
                 return (Class) actualTypes[0];
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return Object.class;
     }

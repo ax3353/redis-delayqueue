@@ -26,9 +26,9 @@ public class JobPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof JobCallback) {
-            JobCallback jobCallback = (JobCallback) bean;
-            callbackMap.put(jobCallback.topic(), jobCallback);
+        if (bean instanceof Callback) {
+            Callback callback = (Callback) bean;
+            callbackMap.put(callback.topic(), callback);
         }
         return bean;
     }

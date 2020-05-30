@@ -1,7 +1,7 @@
 package cn.udream.spring.eventdrive.delayqueue.example;
 
 import cn.udream.spring.eventdrive.delayqueue.consts.ExecuteState;
-import cn.udream.spring.eventdrive.delayqueue.core.JobCallback;
+import cn.udream.spring.eventdrive.delayqueue.core.Callback;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -14,18 +14,17 @@ import java.util.Random;
  */
 @Component
 @Slf4j
-public class TestWaitingNotifyListener implements JobCallback<PayFlow> {
+public class TestStringListener implements Callback<String> {
 
     @Override
     public String topic() {
-        return "pay-notify";
+        return "test-string";
     }
 
     @Override
-    public ExecuteState execute(PayFlow payFlow) {
+    public ExecuteState execute(String aLong) {
         boolean b = new Random().nextBoolean();
-        log.info("execute: {}, result: {}!!!", payFlow, b);
+        log.info("TestStringListener Execute: {}, Result: {}!!!", aLong, b);
         return b ? ExecuteState.SUCCESS : ExecuteState.FAILURE;
     }
-
 }

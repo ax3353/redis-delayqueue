@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class Scheduler {
 
     @Resource
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     private ScheduledExecutorService scheduledThreadPool;
     @Autowired

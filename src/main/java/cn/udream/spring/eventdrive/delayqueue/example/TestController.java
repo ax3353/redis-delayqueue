@@ -33,16 +33,46 @@ public class TestController {
     @Autowired
     private DelayBucket delayBucket;
 
-    @GetMapping("push")
-    public String push() {
+    @GetMapping("pushObject")
+    public String pushObject() {
         int delay = new Random().nextInt(10);
         Job<PayFlow> job = new Job<>();
         job.setId(Instant.now().getEpochSecond() + "");
-        job.setTopic("pay-notify");
+        job.setTopic("test-pay-notify");
         job.setDelay(delay);
         job.setTtr(60);
         job.setBody(new PayFlow(1234560L, 1234567L, new BigDecimal("123.98"), 1, LocalDateTime.now()));
         job.setIntervals(new int[]{0, 0, 12, 30});
+        List<Object> objects = delayBucket.push(job);
+        log.info("push success, objects: {}", objects);
+        return "push success";
+    }
+
+    @GetMapping("pushString")
+    public String pushString() {
+        int delay = new Random().nextInt(10);
+        Job<String> job = new Job<>();
+        job.setId(Instant.now().getEpochSecond() + "");
+        job.setTopic("test-string");
+        job.setDelay(delay);
+        job.setTtr(60);
+        job.setBody("0123456789");
+        job.setIntervals(new int[]{0, 0, 12, 30});
+        List<Object> objects = delayBucket.push(job);
+        log.info("push success, objects: {}", objects);
+        return "push success";
+    }
+
+    @GetMapping("pushLong")
+    public String pushLong() {
+        int delay = new Random().nextInt(10);
+        Job<Long> job = new Job<>();
+        job.setId(Instant.now().getEpochSecond() + "");
+        job.setTopic("test-long");
+        job.setDelay(delay);
+        job.setTtr(60);
+        job.setBody(123456789L);
+        job.setIntervals(new int[]{0, 0, 3, 6});
         List<Object> objects = delayBucket.push(job);
         log.info("push success, objects: {}", objects);
         return "push success";

@@ -1,7 +1,7 @@
 package cn.udream.spring.eventdrive.delayqueue.core;
 
 import cn.udream.spring.eventdrive.delayqueue.consts.KEYS;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -17,9 +17,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class DelayBucket {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    public DelayBucket(RedisTemplate<String, String> redisTemplate) {
+    public DelayBucket(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -32,7 +32,6 @@ public class DelayBucket {
         redisTemplate.multi();
         redisTemplate.opsForZSet().add(KEYS.DELAY_KEY, jobId, executeTime);
 
-        ObjectMapper mapper = new ObjectMapper();
         MetaJob metaJob = new MetaJob();
         metaJob.setId(jobId);
         metaJob.setTopic(job.getTopic());
@@ -40,9 +39,8 @@ public class DelayBucket {
         metaJob.setHasRetry(0);
         metaJob.setIntervals(job.getIntervals());
         try {
-            metaJob.setBody(mapper.writeValueAsString(job.getBody()));
-            String metaJobHashValue = mapper.writeValueAsString(metaJob);
-            redisTemplate.opsForHash().put(KEYS.HASH_KEY, jobId, metaJobHashValue);
+            metaJob.setBody(JSON.toJSONString(job.getBody()));
+            redisTemplate.opsForHash().put(KEYS.HASH_KEY, jobId, metaJob);
         } catch (Exception e) {
             log.error("Convert MetaJob To Json Exception", e);
             redisTemplate.opsForZSet().remove(KEYS.DELAY_KEY, jobId);
