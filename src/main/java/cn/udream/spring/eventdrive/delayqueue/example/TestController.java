@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -25,7 +24,7 @@ import java.util.*;
 @Slf4j
 public class TestController {
 
-    @Resource
+    @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     private DelayBucket delayBucket;
@@ -37,7 +36,6 @@ public class TestController {
         job.setId(Instant.now().getEpochSecond() + "");
         job.setTopic("test-pay-notify");
         job.setDelay(delay);
-        job.setTtr(60);
 
         PayFlow payFlow = new PayFlow(1234560L, 1234567L, new BigDecimal("123.98"), 1, LocalDateTime.now());
         PayFlow.Abcd abcd = new PayFlow.Abcd("s", 100000L, 124);
@@ -61,7 +59,6 @@ public class TestController {
         job.setId(Instant.now().getEpochSecond() + "");
         job.setTopic("test-string");
         job.setDelay(delay);
-        job.setTtr(60);
         job.setBody("0123456789");
         job.setIntervals(new int[]{0, 0, 12, 30});
         List<Object> objects = delayBucket.push(job);
@@ -76,9 +73,92 @@ public class TestController {
         job.setId(Instant.now().getEpochSecond() + "");
         job.setTopic("test-long");
         job.setDelay(delay);
-        job.setTtr(60);
         job.setBody(123456789L);
         job.setIntervals(new int[]{0, 0, 3, 6});
+        List<Object> objects = delayBucket.push(job);
+        log.info("push success, objects: {}", objects);
+        return "push success";
+    }
+
+    @GetMapping("pushInteger")
+    public String pushInteger() {
+        int delay = new Random().nextInt(3);
+        Job<Integer> job = new Job<>();
+        job.setId(Instant.now().getEpochSecond() + "");
+        job.setTopic("test-int");
+        job.setDelay(delay);
+        job.setBody(1234567);
+        job.setIntervals(new int[]{0, 2});
+        List<Object> objects = delayBucket.push(job);
+        log.info("push success, objects: {}", objects);
+        return "push success";
+    }
+
+    @GetMapping("pushDouble")
+    public String pushDouble() {
+        int delay = new Random().nextInt(3);
+        Job<Double> job = new Job<>();
+        job.setId(Instant.now().getEpochSecond() + "");
+        job.setTopic("test-double");
+        job.setDelay(delay);
+        job.setBody(1234567.98D);
+        job.setIntervals(new int[]{0, 2});
+        List<Object> objects = delayBucket.push(job);
+        log.info("push success, objects: {}", objects);
+        return "push success";
+    }
+
+    @GetMapping("pushBoolean")
+    public String pushBoolean() {
+        int delay = new Random().nextInt(3);
+        Job<Boolean> job = new Job<>();
+        job.setId(Instant.now().getEpochSecond() + "");
+        job.setTopic("test-boolean");
+        job.setDelay(delay);
+        job.setBody(Boolean.FALSE);
+        job.setIntervals(new int[]{0, 2});
+        List<Object> objects = delayBucket.push(job);
+        log.info("push success, objects: {}", objects);
+        return "push success";
+    }
+
+    @GetMapping("pushCharacter")
+    public String pushCharacter() {
+        int delay = new Random().nextInt(3);
+        Job<Character> job = new Job<>();
+        job.setId(Instant.now().getEpochSecond() + "");
+        job.setTopic("test-char");
+        job.setDelay(delay);
+        job.setBody(Character.valueOf('c'));
+        job.setIntervals(new int[]{0, 2});
+        List<Object> objects = delayBucket.push(job);
+        log.info("push success, objects: {}", objects);
+        return "push success";
+    }
+
+    @GetMapping("pushByte")
+    public String pushByte() {
+        int delay = new Random().nextInt(3);
+        Job<Byte> job = new Job<>();
+        job.setId(Instant.now().getEpochSecond() + "");
+        job.setTopic("test-byte");
+        job.setDelay(delay);
+        job.setBody(new Byte("1"));
+        job.setIntervals(new int[]{0, 2});
+        List<Object> objects = delayBucket.push(job);
+        log.info("push success, objects: {}", objects);
+        return "push success";
+    }
+
+    @GetMapping("pushShort")
+    public String pushShort() {
+        int delay = new Random().nextInt(3);
+        Job<Short> job = new Job<>();
+        job.setId(Instant.now().getEpochSecond() + "");
+        job.setTopic("test-short");
+        job.setDelay(delay);
+        job.setBody(Short.valueOf("123"));
+        job.setIntervals(new int[]{0, 2});
         List<Object> objects = delayBucket.push(job);
         log.info("push success, objects: {}", objects);
         return "push success";

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class Scheduler {
 
-    @Resource
+    @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     private ScheduledExecutorService scheduledThreadPool;
@@ -35,8 +34,8 @@ public class Scheduler {
 
     @PostConstruct
     public void postConstruct() {
-        log.info("Bucket Scanning...");
         scheduledThreadPool.scheduleAtFixedRate(new DelayTask(redisTemplate, executeThreadPool, globalConfig), 0, 1000, TimeUnit.MILLISECONDS);
+        log.info("Scheduler Starting...");
     }
 
     @PreDestroy

@@ -33,11 +33,6 @@ public class MetaJob implements Serializable {
     private String body;
 
     /**
-     * Job执行超时时间。单位：秒
-     */
-    private int ttr;
-
-    /**
      * 已经重试到第几次
      */
     private int hasRetry;

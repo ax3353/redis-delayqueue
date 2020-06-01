@@ -29,11 +29,6 @@ public class Job<T extends Serializable> implements Serializable {
     private transient int delay;
 
     /**
-     * Job执行超时时间。单位：秒
-     */
-    private transient int ttr;
-
-    /**
      * Job的内容
      */
     private T body;

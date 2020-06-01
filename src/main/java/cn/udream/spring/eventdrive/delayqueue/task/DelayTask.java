@@ -83,6 +83,7 @@ public class DelayTask implements Runnable {
         ExecuteState executeState = callback.execute(body);
         if (ExecuteState.SUCCESS.equals(executeState)) {
             this.deleteJob(key);
+            log.info("callback execute success, clear key: {}", key);
         } else {
             this.retry(key, metaJob);
         }
@@ -130,7 +131,7 @@ public class DelayTask implements Runnable {
 
         redisTemplate.exec();
         redisTemplate.setEnableTransactionSupport(false);
-        log.warn("回调执行失败, 重新放入队列 jobId: {}, executeTime: {}", jobId, executeTime);
+        log.warn("回调第{}次执行失败, 重新放入队列 jobId: {}, executeTime: {}", hasRetry, jobId, executeTime);
     }
 
     private void deleteJob(String key) {
@@ -157,14 +158,18 @@ public class DelayTask implements Runnable {
     }
 
     private Object convert(Class clazz, String value) {
-        if (String.class == clazz) return value;
-        if (Boolean.class == clazz) return Boolean.parseBoolean(value);
-        if (Byte.class == clazz) return Byte.parseByte(value);
-        if (Short.class == clazz) return Short.parseShort(value);
-        if (Integer.class == clazz) return Integer.parseInt(value);
-        if (Long.class == clazz) return Long.parseLong(value);
-        if (Float.class == clazz) return Float.parseFloat(value);
-        if (Double.class == clazz) return Double.parseDouble(value);
+        try {
+            if (Boolean.class == clazz) return Boolean.parseBoolean(value);
+            if (Byte.class == clazz) return Byte.parseByte(value);
+            if (Short.class == clazz) return Short.parseShort(value);
+            if (Integer.class == clazz) return Integer.parseInt(value);
+            if (Long.class == clazz) return Long.parseLong(value);
+            if (Float.class == clazz) return Float.parseFloat(value);
+            if (Double.class == clazz) return Double.parseDouble(value);
+            if (Character.class == clazz) return value.charAt(0);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
         return value;
     }
 }

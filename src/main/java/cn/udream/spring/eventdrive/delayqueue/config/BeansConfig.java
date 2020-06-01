@@ -37,7 +37,6 @@ public class BeansConfig {
     private final AtomicInteger executeThreadCounter = new AtomicInteger(1);
 
     @Bean
-    @ConditionalOnMissingBean(name = {"redisTemplate"})
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(factory);
