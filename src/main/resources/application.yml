@@ -14,12 +14,12 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 20s
   redis:
-    host: 127.0.0.1
-    port: 6379
-    password: Zhiyuan20160416
-    timeout: 6000       # 连接超时时长（毫秒）
-    pool:
-      max-active: 1000  # 连接池最大连接数（使用负值表示没有限制）
-      max-wait: -1      # 连接池最大阻塞等待时间（使用负值表示没有限制）
-      max-idle: 10      # 连接池中的最大空闲连接
-      min-idle: 5       # 连接池中的最小空闲连接
+    password:
+    cluster:
+      nodes: 172.16.0.230:6381, 172.16.0.230:6382, 172.16.0.231:6381, 172.16.0.231:6382, 172.16.0.232:6381, 172.16.0.232:6382
+      max-redirects: 6
+    lettuce:
+      pool:
+        max-idle: 16
+        max-active: 32
+        min-idle: 8

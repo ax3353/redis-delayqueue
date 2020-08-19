@@ -47,9 +47,8 @@ public class TestController {
 
         job.setBody(payFlow);
         job.setIntervals(new int[]{0, 0, 12, 30});
-        List<Object> objects = delayBucket.push(job);
-        log.info("push success, objects: {}", objects);
-        return "push success";
+        boolean success = delayBucket.push(job);
+        return "push result: " + success;
     }
 
     @GetMapping("pushString")
@@ -61,9 +60,8 @@ public class TestController {
         job.setDelay(delay);
         job.setBody("0123456789");
         job.setIntervals(new int[]{0, 0, 12, 30});
-        List<Object> objects = delayBucket.push(job);
-        log.info("push success, objects: {}", objects);
-        return "push success";
+        boolean success = delayBucket.push(job);
+        return "push result: " + success;
     }
 
     @GetMapping("pushLong")
@@ -75,9 +73,8 @@ public class TestController {
         job.setDelay(delay);
         job.setBody(123456789L);
         job.setIntervals(new int[]{0, 0, 3, 6});
-        List<Object> objects = delayBucket.push(job);
-        log.info("push success, objects: {}", objects);
-        return "push success";
+        boolean success = delayBucket.push(job);
+        return "push result: " + success;
     }
 
     @GetMapping("pushInteger")
@@ -89,9 +86,8 @@ public class TestController {
         job.setDelay(delay);
         job.setBody(1234567);
         job.setIntervals(new int[]{0, 2});
-        List<Object> objects = delayBucket.push(job);
-        log.info("push success, objects: {}", objects);
-        return "push success";
+        boolean success = delayBucket.push(job);
+        return "push result: " + success;
     }
 
     @GetMapping("pushDouble")
@@ -103,9 +99,8 @@ public class TestController {
         job.setDelay(delay);
         job.setBody(1234567.98D);
         job.setIntervals(new int[]{0, 2});
-        List<Object> objects = delayBucket.push(job);
-        log.info("push success, objects: {}", objects);
-        return "push success";
+        boolean success = delayBucket.push(job);
+        return "push result: " + success;
     }
 
     @GetMapping("pushBoolean")
@@ -117,9 +112,8 @@ public class TestController {
         job.setDelay(delay);
         job.setBody(Boolean.FALSE);
         job.setIntervals(new int[]{0, 2});
-        List<Object> objects = delayBucket.push(job);
-        log.info("push success, objects: {}", objects);
-        return "push success";
+        boolean success = delayBucket.push(job);
+        return "push result: " + success;
     }
 
     @GetMapping("pushCharacter")
@@ -131,9 +125,8 @@ public class TestController {
         job.setDelay(delay);
         job.setBody(Character.valueOf('c'));
         job.setIntervals(new int[]{0, 2});
-        List<Object> objects = delayBucket.push(job);
-        log.info("push success, objects: {}", objects);
-        return "push success";
+        boolean success = delayBucket.push(job);
+        return "push result: " + success;
     }
 
     @GetMapping("pushByte")
@@ -145,9 +138,8 @@ public class TestController {
         job.setDelay(delay);
         job.setBody(new Byte("1"));
         job.setIntervals(new int[]{0, 2});
-        List<Object> objects = delayBucket.push(job);
-        log.info("push success, objects: {}", objects);
-        return "push success";
+        boolean success = delayBucket.push(job);
+        return "push result: " + success;
     }
 
     @GetMapping("pushShort")
@@ -159,9 +151,8 @@ public class TestController {
         job.setDelay(delay);
         job.setBody(Short.valueOf("123"));
         job.setIntervals(new int[]{0, 2});
-        List<Object> objects = delayBucket.push(job);
-        log.info("push success, objects: {}", objects);
-        return "push success";
+        boolean success = delayBucket.push(job);
+        return "push result: " + success;
     }
 
     @GetMapping("keys")

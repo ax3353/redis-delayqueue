@@ -9,7 +9,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -56,7 +55,7 @@ public class DelayBucket {
         this.redisTemplate = redisTemplate;
     }
 
-    public List<Object> push(Job<?> job) {
+    public boolean push(Job<?> job) {
         String jobId = job.getId();
         String topic = job.getTopic();
         Serializable body = job.getBody();
@@ -67,10 +66,10 @@ public class DelayBucket {
 
         long now = Instant.now().getEpochSecond();
         long executeTime = now + TimeUnit.SECONDS.toSeconds(job.getDelay());
-
-        redisTemplate.setEnableTransactionSupport(true);
-        redisTemplate.multi();
-        redisTemplate.opsForZSet().add(KEYS.DELAY_KEY, jobId, executeTime);
+        Boolean add = redisTemplate.opsForZSet().add(KEYS.DELAY_KEY, jobId, executeTime);
+        if (add == null || !add) {
+            return false;
+        }
 
         MetaJob metaJob = new MetaJob();
         metaJob.setId(jobId);
@@ -81,12 +80,12 @@ public class DelayBucket {
             metaJob.setBody(JSON.toJSONString(body, sc));
             redisTemplate.opsForHash().put(KEYS.HASH_KEY, jobId, metaJob);
         } catch (Exception e) {
-            log.error("Convert MetaJob To Json Exception", e);
+            log.error("Job push Exception -> {}", metaJob, e);
             redisTemplate.opsForZSet().remove(KEYS.DELAY_KEY, jobId);
+            redisTemplate.opsForHash().delete(KEYS.HASH_KEY, jobId);
+            return false;
         }
-
-        List<Object> objects = redisTemplate.exec();
-        redisTemplate.setEnableTransactionSupport(false);
-        return objects;
+        log.debug("job push success -> {}", job);
+        return true;
     }
 }

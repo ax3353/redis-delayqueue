@@ -47,7 +47,7 @@ public class DelayTask implements Runnable {
             return;
         }
 
-        log.debug("waiting notify queue has objects: {}", objects);
+        log.debug("delay queue has objects: {}", objects);
 
         objects.stream()
                 .filter(k -> globalConfig.isWaitProcessing(k.toString()))
@@ -118,31 +118,19 @@ public class DelayTask implements Runnable {
         long executeTime = Instant.now().getEpochSecond() + delay;
         String jobId = metaJob.getId();
 
-        redisTemplate.setEnableTransactionSupport(true);
-        redisTemplate.multi();
-
-        redisTemplate.opsForZSet().add(KEYS.DELAY_KEY, jobId, executeTime);
         try {
             redisTemplate.opsForHash().put(KEYS.HASH_KEY, jobId, metaJob);
         } catch (Exception e) {
-            log.error("Json Processing Exception", e);
+            log.error("Job RePush Exception -> {}", metaJob, e);
             redisTemplate.opsForZSet().remove(KEYS.DELAY_KEY, jobId);
+            redisTemplate.opsForHash().delete(KEYS.HASH_KEY, jobId);
         }
-
-        redisTemplate.exec();
-        redisTemplate.setEnableTransactionSupport(false);
         log.warn("回调第{}次执行失败, 重新放入队列 jobId: {}, executeTime: {}", hasRetry, jobId, executeTime);
     }
 
     private void deleteJob(String key) {
-        redisTemplate.setEnableTransactionSupport(true);
-        redisTemplate.multi();
-
         redisTemplate.opsForZSet().remove(KEYS.DELAY_KEY, key);
         redisTemplate.opsForHash().delete(KEYS.HASH_KEY, key);
-
-        redisTemplate.exec();
-        redisTemplate.setEnableTransactionSupport(false);
     }
 
     private Class getActualType(Callback callback) {
