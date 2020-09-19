@@ -12,7 +12,9 @@ pipeline{
             agent any
             steps {
                 dir("${JENKINS_HOME}/jobs/eventdriver/branches/${BRANCH_NAME}/builds"){
-                    sh "find -name '[1-9]*' -type d -mtime +3 |xargs rm -rf"
+                    echo "Clean"
+                    // -mtime 0 表示文件修改时间距离当前时间不到1天（24小时）以内的文件
+                    sh "find -name '[1-9]*' -type d -mtime 0 |xargs rm -rf"
                 }
             }
         }
@@ -61,27 +63,26 @@ pipeline{
     post {
         always{
             script{
-                println("流水线结束后，经常做的事情")
+                println("结束")
             }
         }
 
         success{
             script{
-                println("流水线成功后，要做的事情")
+                println("成功")
             }
 
         }
         failure{
             script{
-                println("流水线失败后，要做的事情")
+                println("失败")
             }
         }
 
         aborted{
             script{
-                println("流水线取消后，要做的事情")
+                println("取消")
             }
-
         }
     }
 }
