@@ -13,9 +13,9 @@ pipeline{
             steps {
                 echo "Clean - 0"
                 dir("${JENKINS_HOME}/jobs/eventdriver/branches/${BRANCH_NAME}/builds"){
-                    echo "Clean - 1"
-                    // -mtime 0 表示文件修改时间距离当前时间不到1天（24小时）以内的文件
-                    sh "find -name '[1-9]*' -type d -mtime 0 |xargs rm -rf"
+                    echo "清除 ${JENKINS_HOME}/jobs/eventdriver/branches/${BRANCH_NAME}/builds 的文件"
+                    // -mtime 0 表示文件修改时间距离当前时间1天（24小时－48小时）的文件
+                    sh "find -name '[1-9]*' -type d -mtime 1 |xargs rm -rf"
                 }
             }
         }
@@ -25,7 +25,7 @@ pipeline{
             steps {
                 echo "Mvn Build - 0"
                 dir("./eventdriver_master"){
-                    echo "Mvn Build - 1"
+                    echo "开始代码构建"
                     sh 'mvn clean install -Dfile.encoding=UTF-8 -DskipTests=true'
                 }
             }
@@ -36,7 +36,7 @@ pipeline{
             steps {
                 echo "Docker Build - 0"
                 dir("./eventdriver_master"){
-                    echo "Docker Build - 1"
+                    echo "构建镜像， 推送至仓库， 删除本地镜像"
                     // 构建镜像
                     sh "docker build -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER} ."
                     // 推送至仓库
@@ -52,7 +52,7 @@ pipeline{
             steps {
                 echo "Deploy - 0"
                 dir("./eventdriver_master"){
-                    echo "Deploy - 1"
+                    echo "部署应用"
                     // 将占位符替换成最新版本
                     sh "sed -i 's/-version-/${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}/g' Deployment.yaml"
                     // 部署应用
