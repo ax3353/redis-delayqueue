@@ -10,8 +10,8 @@ pipeline{
     stages{
         stage("Clean"){
             agent any
-            echo "Clean - 0"
             steps {
+                echo "Clean - 0"
                 dir("${JENKINS_HOME}/jobs/eventdriver/branches/${BRANCH_NAME}/builds"){
                     echo "Clean - 1"
                     // -mtime 0 表示文件修改时间距离当前时间不到1天（24小时）以内的文件
@@ -22,8 +22,8 @@ pipeline{
 
         stage('Mvn Build'){
             agent any
-            echo "Mvn Build - 0"
             steps {
+                echo "Mvn Build - 0"
                 dir("./eventdriver_master"){
                     echo "Mvn Build - 1"
                     sh 'mvn clean install -Dfile.encoding=UTF-8 -DskipTests=true'
@@ -33,8 +33,8 @@ pipeline{
 
         stage('Docker Build') {
             agent any
-            echo "Docker Build - 0"
             steps {
+                echo "Docker Build - 0"
                 dir("./eventdriver_master"){
                     echo "Docker Build - 1"
                     // 构建镜像
@@ -49,8 +49,8 @@ pipeline{
 
         stage('Deploy') {
             agent any
-            echo "Deploy - 0"
             steps {
+                echo "Deploy - 0"
                 dir("./eventdriver_master"){
                     echo "Deploy - 1"
                     // 将占位符替换成最新版本
