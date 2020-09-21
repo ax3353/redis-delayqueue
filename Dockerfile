@@ -11,9 +11,9 @@ ARG JAR_FILE
 ENV WORK_PATH="/opt/services"
 
 # 从上下文目录中复制文件或者目录到容器里中指定的路径, 该路径不用事先建好，路径不存在则会自动创建
-COPY target/${JAR_FILE} ${WORK_PATH}/
+COPY target/eventdrive-0.0.1-SNAPSHOT.jar /opt/services/
 
-WORKDIR ${WORK_PATH}
+WORKDIR /opt/services
 
 # 指定容器启动程序及参数   <ENTRYPOINT> "<CMD>"
-ENTRYPOINT exec java -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -jar ${JAR_FILE}
+ENTRYPOINT exec java -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -jar eventdrive-0.0.1-SNAPSHOT.jar
