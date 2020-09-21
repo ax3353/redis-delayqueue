@@ -32,11 +32,11 @@ pipeline{
             steps {
                 echo "构建镜像， 推送至仓库， 删除本地镜像"
                 // 构建镜像
-                sh "docker build -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver} ."
+                sh "docker build -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER} ."
                 // 推送至仓库
-                sh "docker push registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}"
+                sh "docker push registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}"
                 // 删除本地镜像
-                sh "docker rmi registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}"
+                sh "docker rmi registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}"
             }
         }
 
@@ -45,11 +45,11 @@ pipeline{
             steps {
                 echo "部署应用"
                 // 将占位符替换成最新版本
-                sh "sed -i 's/-version-/eventdriver-${BRANCH_NAME}-${eventdriver}/g' Deployment.yaml"
+                sh "sed -i 's/-version-/eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}/g' Deployment.yaml"
                 // 部署应用
                 sh "kubectl apply -f Deployment.yaml --namespace=my-app"
                 // 将最新版本替换成占位符
-                sh "sed -i 's/eventdriver-${BRANCH_NAME}-${eventdriver}/-version-/g' Deployment.yaml"
+                sh "sed -i 's/eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}/-version-/g' Deployment.yaml"
             }
         }
     }
