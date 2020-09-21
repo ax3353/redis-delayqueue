@@ -18,7 +18,7 @@ spec:
       containers: #docker容器的配置
         - name: eventdriver
           image: registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:-version- # pull镜像的地址 ip:prot/dir/images:tag
-          imagePullPolicy: IfNotPresent #pull镜像时机，
+          imagePullPolicy: Always #pull镜像时机，
           ports:
             - containerPort: 9191 #容器对外开放端口
 
