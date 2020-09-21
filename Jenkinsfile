@@ -25,12 +25,14 @@ pipeline{
             steps {
                 echo "开始代码构建"
                 sh 'mvn clean package -Dfile.encoding=UTF-8 -DskipTests=true'
+                stash includes: 'target/*.jar', name: 'app'
             }
         }
 
         stage('Docker Build') {
             agent any
             steps {
+                unstash 'app'
                 echo "构建镜像， 推送至仓库， 删除本地镜像"
                 // 构建镜像
                 sh "docker build --build-arg JAR_FILE=`ls target/*.jar -h |cut -d '/' -f2 | head -1` -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER} ."
