@@ -11,6 +11,7 @@ ARG JAR_FILE
 ENV WORK_PATH="/opt/services"
 
 # 从上下文目录中复制文件或者目录到容器里中指定的路径, 该路径不用事先建好，路径不存在则会自动创建
+RUN echo "---------------------------- ${JAR_FILE}"
 COPY target/$JAR_FILE $WORK_PATH/
 
 WORKDIR $WORK_PATH

@@ -32,7 +32,7 @@ pipeline{
             steps {
                 echo "构建镜像， 推送至仓库， 删除本地镜像"
                 // 构建镜像
-                sh "docker build --build-arg JAR_FILE=eventdrive-0.0.1-SNAPSHOT.jar -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver} ."
+                sh "docker build --build-arg JAR_FILE='eventdrive-0.0.1-SNAPSHOT.jar' -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver} ."
                 // 推送至仓库
                 sh "docker push registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}"
                 // 删除本地镜像
