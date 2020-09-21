@@ -33,7 +33,7 @@ pipeline{
             steps {
                 echo "构建镜像， 推送至仓库， 删除本地镜像"
                 // 构建镜像
-                sh "docker build --build-arg JAR_FILE=`ls target/*.jar -h |cut -d '/' -f2` -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER} ."
+                sh "docker build --build-arg JAR_FILE=`ls target/*.jar -h |cut -d '/' -f2 | head -1` -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER} ."
                 // 推送至仓库
                 sh "docker push registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}"
                 // 删除本地镜像
