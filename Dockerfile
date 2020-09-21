@@ -4,14 +4,16 @@ FROM fancybing/java:serverjre-8
 # 维护者信息
 MAINTAINER zk 247213579@qq.com
 
-# 容器内的指定路径，该路径不用事先建好，路径不存在则会自动创建
-ARG WORK_PATH="/opt/services"
+# 参数
 ARG JAR_FILE
 
-# 从上下文目录中复制文件或者目录到容器里中指定的路径
-COPY ./target/$JAR_FILE $WORK_PATH/
+# 环境变量
+ENV WORK_PATH="/opt/services"
 
-WORKDIR $WORK_PATH
+# 从上下文目录中复制文件或者目录到容器里中指定的路径, 该路径不用事先建好，路径不存在则会自动创建
+COPY target/${JAR_FILE} ${WORK_PATH}/
+
+WORKDIR ${WORK_PATH}
 
 # 指定容器启动程序及参数   <ENTRYPOINT> "<CMD>"
-ENTRYPOINT exec java -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -jar $JAR_FILE
+ENTRYPOINT exec java -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -jar ${JAR_FILE}
