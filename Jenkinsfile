@@ -24,7 +24,7 @@ pipeline{
             agent any
             steps {
                 echo "开始代码构建"
-                sh 'mvn clean install -Dfile.encoding=UTF-8 -DskipTests=true'
+                sh 'mvn clean package -Dfile.encoding=UTF-8 -DskipTests=true'
             }
         }
 
@@ -33,11 +33,11 @@ pipeline{
             steps {
                 echo "构建镜像， 推送至仓库， 删除本地镜像"
                 // 构建镜像
-                sh "docker build -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER} ."
+                sh "docker build --build-arg JAR_FILE=`ls target/*.jar -h |cut -d '/' -f2` -t registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER} ."
                 // 推送至仓库
-                sh "docker push registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}"
+                sh "docker push registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}"
                 // 删除本地镜像
-                sh "docker rmi registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}"
+                sh "docker rmi registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}"
             }
         }
 
@@ -46,11 +46,11 @@ pipeline{
             steps {
                 echo "部署应用"
                 // 将占位符替换成最新版本
-                sh "sed -i 's/-version-/${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}/g' Deployment.yaml"
+                sh "sed -i 's/-version-/eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}/g' Deployment.yaml"
                 // 部署应用
                 sh "kubectl apply -f Deployment.yaml --namespace=my-app"
                 // 将最新版本替换成占位符
-                sh "sed -i 's/${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}/-version-/g' Deployment.yaml"
+                sh "sed -i 's/eventdriver-${BRANCH_NAME}-${eventdriver}-${BUILD_NUMBER}/-version-/g' Deployment.yaml"
             }
         }
     }

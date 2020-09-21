@@ -2,13 +2,14 @@
 FROM fancybing/java:serverjre-8
 
 #维护者信息
-MAINTAINER zk <247213579@qq.com>
+MAINTAINER zk 247213579@qq.com
 
 ARG WORK_PATH="/work/services"
-ARG JAR_FILE="eventdrive-0.0.1-SNAPSHOT.jar"
+ARG JAR_FILE
 
 #复制上下文目录下的target/demo-1.0.0.jar 到容器里
 COPY target/$JAR_FILE $WORK_PATH/
+RUN ls $WORK_PATH/
 
 WORKDIR $WORK_PATH
 
