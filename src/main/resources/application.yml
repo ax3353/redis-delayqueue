@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9191
   shutdown: graceful
 
 # 日志级别 (名称以logging.level开头，后面跟要输入日志的包名， 这里定义的级别优先于logback.xml里定义的级别)

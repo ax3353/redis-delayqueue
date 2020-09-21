@@ -25,7 +25,7 @@ public class OrderController {
     public String createOrder() {
         Order order = new Order(1L, LocalDateTime.now(), 100);
         orderService.saveOrder(order);
-        return "SUCC";
+        return "SUCC!!!";
     }
 
 }
