@@ -6,6 +6,9 @@ MAINTAINER zk 247213579@qq.com
 
 # 环境变量
 ENV WORK_PATH="/opt/services" JAR_FILE="eventdrive-0.0.1-SNAPSHOT.jar"
+ENV LANG es_US.utf8
+ENV LANG zh_CN.utf8
+ENV LC_ALL es_US.utf8
 
 # 从上下文目录中复制文件或者目录到容器里中指定的路径, 该路径不用事先建好，路径不存在则会自动创建
 COPY target/${JAR_FILE} ${WORK_PATH}/
