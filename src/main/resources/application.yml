@@ -6,7 +6,7 @@ server:
 logging:
   level:
     root: info
-    cn.udream.spring.eventdrive: debug
+    cn.udream.delayqueue: debug
 
 spring:
   application:
@@ -14,12 +14,15 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 20s
   redis:
-    password:
-    cluster:
-      nodes: 172.16.0.230:6381, 172.16.0.230:6382, 172.16.0.231:6381, 172.16.0.231:6382, 172.16.0.232:6381, 172.16.0.232:6382
-      max-redirects: 6
-    lettuce:
-      pool:
-        max-idle: 16
-        max-active: 32
-        min-idle: 8
+    # 单机版配置
+    host: 192.168.1.126
+    password: Zhiyuan20160416
+    # 集群版配置
+#    cluster:
+#      nodes: 192.168.1.126:6379
+#      max-redirects: 1
+#    lettuce:
+#      pool:
+#        max-idle: 16
+#        max-active: 32
+#        min-idle: 8

@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment #对象类型
 metadata:
-  name: eventdriver #名称
+  name: redis_delayqueue #名称
   labels:
-    app: eventdriver #标注
+    app: redis_delayqueue #标注
     version: -version-
 spec:
   replicas: 1 #运行容器的副本数，修改这里可以快速修改分布式节点数量
   selector:
     matchLabels:
-      app: eventdriver
+      app: redis_delayqueue
   template:
     metadata:
       labels:
-        app: eventdriver
+        app: redis_delayqueue
     spec:
       containers: #docker容器的配置
-        - name: eventdriver
+        - name: redis_delayqueue
           image: registry.cn-shenzhen.aliyuncs.com/zk-docker-repos/docker-repos:-version- # pull镜像的地址 ip:prot/dir/images:tag
           imagePullPolicy: Always #pull镜像时机，
           ports:
@@ -26,13 +26,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: eventdriver
+  name: redis_delayqueue
   labels:
-    app: eventdriver
+    app: redis_delayqueue
 spec:
   type: NodePort
   ports:
     - port: 9191
       nodePort: 30091 #service对外开放端口
   selector:
-    app: eventdriver
+    app: redis_delayqueue
